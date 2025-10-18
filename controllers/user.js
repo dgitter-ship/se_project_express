@@ -5,7 +5,7 @@ const {
   badStatusCode,
   notFoundStatusCode,
   internalServerErrorCode,
-} = require("../utils/statusCodes");
+} = require("../utils/errors");
 
 //GET Users
 
