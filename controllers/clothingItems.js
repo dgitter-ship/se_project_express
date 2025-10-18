@@ -1,14 +1,21 @@
 const clothingItem = require("../models/clothingItems");
+const {
+  goodStatusCode,
+  createStatusCode,
+  badStatusCode,
+  notFoundStatusCode,
+  internalServerErrorCode,
+} = require("../utils/statusCodes");
 
 const getItems = (req, res) => {
   clothingItem
     .find({})
     .then((item) => {
-      res.status(200).send(item);
+      res.status(goodStatusCode).send(item);
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(internalServerErrorCode).send({ message: err.message });
     });
 };
 
@@ -26,7 +33,7 @@ const createItem = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(internalServerErrorCode).send({ message: err.message });
     });
 };
 
@@ -38,11 +45,11 @@ const updateItem = (req, res) => {
     .findByIdAndUpdate(itemId, { $set: { imageUrl } })
     .orFail()
     .then((item) => {
-      res.status(200).send({ data: item });
+      res.status(goodStatusCode).send({ data: item });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(internalServerErrorCode).send({ message: err.message });
     });
 };
 
@@ -53,11 +60,11 @@ const deleteItem = (req, res) => {
     .findByIdAndDelete(itemId)
     .orFail()
     .then((item) => {
-      res.status(204).send({});
+      res.status(createStatusCode).send({});
     })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(internalServerErrorCode).send({ message: err.message });
     });
 };
 
