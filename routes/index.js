@@ -5,5 +5,8 @@ const clothingRouter = require("./clothingItems");
 
 router.use("/users", userRouter);
 router.use("/items", clothingRouter);
+// router.use("*", (req, res) => {
+//   res.status(404).json({ message: "Requested resource not found" });
+// });
 
 module.exports = router;

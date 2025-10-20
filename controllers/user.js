@@ -37,10 +37,15 @@ const createUser = (req, res) => {
 const getUserId = (req, res) => {
   const { userId } = req.params;
   User.findById(userId)
+    .orFail(() => {
+      const error = new Error("Item ID not found");
+      error.statusCode = notFoundStatusCode;
+      throw error;
+    })
     .then((user) => res.status(goodStatusCode).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.name === "DocumentNotFoundError") {
+      if (err.statusCode === notFoundStatusCode) {
         return res.status(notFoundStatusCode).send({ message: err.message });
       } else if (err.name === "CastError") {
         return res.status(badStatusCode).send({ message: err.message });

@@ -24,9 +24,10 @@ const createItem = (req, res) => {
   console.log(req.body);
 
   const { name, weather, imageUrl } = req.body;
+  const owner = req.user._id;
 
   clothingItem
-    .create({ name, weather, imageUrl })
+    .create({ name, weather, imageUrl, owner })
     .then((item) => {
       console.log(item);
       res.send({ data: item });
@@ -59,7 +60,7 @@ const deleteItem = (req, res) => {
   clothingItem
     .findByIdAndDelete(itemId)
     .orFail()
-    .then((item) => {
+    .then(() => {
       res.status(createStatusCode).send({});
     })
     .catch((err) => {
@@ -68,4 +69,43 @@ const deleteItem = (req, res) => {
     });
 };
 
-module.exports = { getItems, createItem, updateItem, deleteItem };
+const likeItem = (req, res) => {
+  const { itemId } = req.params;
+  const userId = req.user._id;
+
+  clothingItem
+    .findByIdAndUpdate(itemId, { $addToSet: { likes: userId } })
+    .orFail()
+    .then((item) => {
+      res.status(goodStatusCode).send({ data: item });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(internalServerErrorCode).send({ message: err.message });
+    });
+};
+
+const deleteLike = (req, res) => {
+  const { itemId } = req.params;
+  const userId = req.user._id;
+
+  clothingItem
+    .findByIdAndUpdate(itemId, { $pull: { likes: userId } })
+    .orFail()
+    .then((item) => {
+      res.status(goodStatusCode).send({ data: item });
+    })
+    .catch((err) => {
+      console.error(err);
+      return res.status(internalServerErrorCode).send({ message: err.message });
+    });
+};
+
+module.exports = {
+  getItems,
+  createItem,
+  updateItem,
+  deleteItem,
+  likeItem,
+  deleteLike,
+};
