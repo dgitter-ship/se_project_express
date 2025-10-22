@@ -1,13 +1,13 @@
-const goodStatusCode = 200;
-const createStatusCode = 201;
-const badStatusCode = 400;
-const notFoundStatusCode = 404;
-const internalServerErrorCode = 500;
+const GOOD_STATUS_CODE = 200;
+const CREATE_STATUS_CODE = 201;
+const BAD_STATUS_CODE = 400;
+const NOT_FOUND_STATUS_CODE = 404;
+const INTERNAL_SERVER_ERROR_CODE = 500;
 
 module.exports = {
-  goodStatusCode,
-  createStatusCode,
-  badStatusCode,
-  notFoundStatusCode,
-  internalServerErrorCode,
+  GOOD_STATUS_CODE,
+  CREATE_STATUS_CODE,
+  BAD_STATUS_CODE,
+  NOT_FOUND_STATUS_CODE,
+  INTERNAL_SERVER_ERROR_CODE,
 };

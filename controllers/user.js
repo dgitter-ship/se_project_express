@@ -1,20 +1,20 @@
 const User = require("../models/user");
 const {
-  goodStatusCode,
-  createStatusCode,
-  badStatusCode,
-  notFoundStatusCode,
-  internalServerErrorCode,
+  GOOD_STATUS_CODE,
+  CREATE_STATUS_CODE,
+  BAD_STATUS_CODE,
+  NOT_FOUND_STATUS_CODE,
+  INTERNAL_SERVER_ERROR_CODE,
 } = require("../utils/errors");
-
-//GET Users
 
 const getUser = (req, res) => {
   User.find({})
-    .then((users) => res.status(goodStatusCode).send(users))
+    .then((users) => res.status(GOOD_STATUS_CODE).send(users))
     .catch((err) => {
       console.error(err);
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
@@ -24,13 +24,15 @@ const createUser = (req, res) => {
     name,
     avatar,
   })
-    .then((user) => res.status(createStatusCode).send(user))
+    .then((user) => res.status(CREATE_STATUS_CODE).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(badStatusCode).send({ message: err.message });
+        return res.status(BAD_STATUS_CODE).send({ message: err.message });
       }
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
@@ -39,18 +41,23 @@ const getUserId = (req, res) => {
   User.findById(userId)
     .orFail(() => {
       const error = new Error("Item ID not found");
-      error.statusCode = notFoundStatusCode;
+      error.statusCode = NOT_FOUND_STATUS_CODE;
       throw error;
     })
-    .then((user) => res.status(goodStatusCode).send(user))
+    .then((user) => res.status(GOOD_STATUS_CODE).send(user))
     .catch((err) => {
       console.error(err);
-      if (err.statusCode === notFoundStatusCode) {
-        return res.status(notFoundStatusCode).send({ message: err.message });
-      } else if (err.name === "CastError") {
-        return res.status(badStatusCode).send({ message: err.message });
+      if (err.statusCode === NOT_FOUND_STATUS_CODE) {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Document Not Found" });
       }
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      if (err.name === "CastError") {
+        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 

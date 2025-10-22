@@ -1,56 +1,43 @@
 const clothingItem = require("../models/clothingItems");
 const {
-  goodStatusCode,
-  createStatusCode,
-  badStatusCode,
-  notFoundStatusCode,
-  internalServerErrorCode,
+  GOOD_STATUS_CODE,
+  CREATE_STATUS_CODE,
+  BAD_STATUS_CODE,
+  NOT_FOUND_STATUS_CODE,
+  INTERNAL_SERVER_ERROR_CODE,
 } = require("../utils/errors");
 
 const getItems = (req, res) => {
   clothingItem
     .find({})
     .then((item) => {
-      res.status(goodStatusCode).send(item);
+      res.status(GOOD_STATUS_CODE).send(item);
     })
     .catch((err) => {
       console.error(err);
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
 const createItem = (req, res) => {
-  console.log(req);
-  console.log(req.body);
-
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
   clothingItem
     .create({ name, weather, imageUrl, owner })
     .then((item) => {
-      console.log(item);
-      res.send({ data: item });
+      res.status(CREATE_STATUS_CODE).res.send({ data: item });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(internalServerErrorCode).send({ message: err.message });
-    });
-};
-
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  clothingItem
-    .findByIdAndUpdate(itemId, { $set: { imageUrl } })
-    .orFail()
-    .then((item) => {
-      res.status(goodStatusCode).send({ data: item });
-    })
-    .catch((err) => {
-      console.error(err);
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      if (err.name === "ValidationError") {
+        return res.status(BAD_STATUS_CODE).send({ message: err.message });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
@@ -61,11 +48,21 @@ const deleteItem = (req, res) => {
     .findByIdAndDelete(itemId)
     .orFail()
     .then(() => {
-      res.status(createStatusCode).send({});
+      res.status(GOOD_STATUS_CODE).send({ message: "Item Deleted" });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      if (err.name === "CastError") {
+        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Invalid User Id" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
@@ -77,11 +74,21 @@ const likeItem = (req, res) => {
     .findByIdAndUpdate(itemId, { $addToSet: { likes: userId } })
     .orFail()
     .then((item) => {
-      res.status(goodStatusCode).send({ data: item });
+      res.status(GOOD_STATUS_CODE).send({ data: item });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      if (err.name === "CastError") {
+        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Invalid User Id" });
+      }
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
@@ -93,18 +100,19 @@ const deleteLike = (req, res) => {
     .findByIdAndUpdate(itemId, { $pull: { likes: userId } })
     .orFail()
     .then((item) => {
-      res.status(goodStatusCode).send({ data: item });
+      res.status(GOOD_STATUS_CODE).send({ data: item });
     })
     .catch((err) => {
       console.error(err);
-      return res.status(internalServerErrorCode).send({ message: err.message });
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
 module.exports = {
   getItems,
   createItem,
-  updateItem,
   deleteItem,
   likeItem,
   deleteLike,
