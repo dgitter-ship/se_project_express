@@ -28,7 +28,7 @@ const createItem = (req, res) => {
   clothingItem
     .create({ name, weather, imageUrl, owner })
     .then((item) => {
-      res.status(CREATE_STATUS_CODE).res.send({ data: item });
+      res.status(CREATE_STATUS_CODE).send({ data: item });
     })
     .catch((err) => {
       console.error(err);
@@ -104,6 +104,12 @@ const deleteLike = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+      if (err.name === "CastError") {
+        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(NOT_FOUND_STATUS_CODE).send({ message: "Not Found" });
+      }
       return res
         .status(INTERNAL_SERVER_ERROR_CODE)
         .send({ message: "Server Error" });
