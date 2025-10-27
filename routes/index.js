@@ -4,11 +4,14 @@ const express = require("express");
 const { NOT_FOUND_STATUS_CODE } = require("../utils/errors");
 const userRouter = require("./users");
 const clothingRouter = require("./clothingItems");
+const { createUser, userLogin } = require("../controllers/user");
 
 const app = express();
 
-router.use("/users", userRouter);
-router.use("/items", clothingRouter);
+router.post("/signup", createUser);
+router.post("/signin", userLogin);
+// router.use("/users", userRouter);
+// router.use("/items", clothingRouter);
 app.use((req, res) => {
   res
     .status(NOT_FOUND_STATUS_CODE)
