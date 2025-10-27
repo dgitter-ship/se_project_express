@@ -1,3 +1,4 @@
+const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const {
   GOOD_STATUS_CODE,
@@ -19,14 +20,26 @@ const getUser = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
-  User.create({
-    name,
-    avatar,
-  })
+  const { name, avatar, email, password } = req.body;
+
+  bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({
+        name,
+        avatar,
+        email,
+        password: hash,
+      })
+    )
     .then((user) => res.status(CREATE_STATUS_CODE).send(user))
     .catch((err) => {
       console.error(err);
+      if (err.code === 11000) {
+        return res.status(409).send({
+          message: "Email already exists",
+        });
+      }
       if (err.name === "ValidationError") {
         return res.status(BAD_STATUS_CODE).send({ message: err.message });
       }
