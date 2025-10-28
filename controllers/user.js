@@ -52,9 +52,10 @@ const createUser = (req, res) => {
     });
 };
 
-const getUserId = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
+const getCurrentUser = (req, res) => {
+  const { _id } = req.user;
+  console.log(_id);
+  User.findById(_id)
     .orFail(() => {
       const error = new Error("Item ID not found");
       error.statusCode = NOT_FOUND_STATUS_CODE;
@@ -95,4 +96,22 @@ const userLogin = (req, res) => {
     });
 };
 
-module.exports = { getUser, createUser, getUserId, userLogin };
+const updateUser = (req, res) => {
+  const opts = { runValidators: true };
+  const { name, avatar } = req.body;
+  const { _id } = req.user;
+
+  User.findByIdAndUpdate(_id, { $set: { name, avatar }, opts })
+    .orFail()
+    .then((user) => {
+      res.status(GOOD_STATUS_CODE).send(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      return res
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: err.message });
+    });
+};
+
+module.exports = { getUser, createUser, getCurrentUser, userLogin, updateUser };

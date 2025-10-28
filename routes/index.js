@@ -1,5 +1,6 @@
 const router = require("express").Router();
 const express = require("express");
+const { auth } = require("../middleware/auth");
 
 const { NOT_FOUND_STATUS_CODE } = require("../utils/errors");
 const userRouter = require("./users");
@@ -10,8 +11,8 @@ const app = express();
 
 router.post("/signup", createUser);
 router.post("/signin", userLogin);
-// router.use("/users", userRouter);
-// router.use("/items", clothingRouter);
+router.use("/users", auth, userRouter);
+router.use("/items", auth, clothingRouter);
 app.use((req, res) => {
   res
     .status(NOT_FOUND_STATUS_CODE)
