@@ -5,6 +5,7 @@ const {
   BAD_STATUS_CODE,
   NOT_FOUND_STATUS_CODE,
   INTERNAL_SERVER_ERROR_CODE,
+  FORBIDDEN_STATUS_CODE,
 } = require("../utils/errors");
 
 const getItems = (req, res) => {
@@ -44,26 +45,38 @@ const createItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  clothingItem
-    .findByIdAndDelete(itemId)
-    .orFail()
-    .then(() => {
-      res.status(GOOD_STATUS_CODE).send({ message: "Item Deleted" });
-    })
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "CastError") {
-        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Invalid User Id" });
-      }
+  clothingItem.findById(itemId).then((item) => {
+    if (!item) {
       return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
-    });
+        .status(NOT_FOUND_STATUS_CODE)
+        .send({ message: "Item not found" });
+    }
+    if (!item.owner.equals(req.user._id)) {
+      return res
+        .status(FORBIDDEN_STATUS_CODE)
+        .send({ message: "Access denied" });
+    }
+    return clothingItem
+      .findByIdAndDelete(itemId)
+      .orFail()
+      .then(() => {
+        res.status(GOOD_STATUS_CODE).send({ message: "Item Deleted" });
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.name === "CastError") {
+          return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+        }
+        if (err.name === "DocumentNotFoundError") {
+          return res
+            .status(NOT_FOUND_STATUS_CODE)
+            .send({ message: "Invalid User Id" });
+        }
+        return res
+          .status(INTERNAL_SERVER_ERROR_CODE)
+          .send({ message: "Server Error" });
+      });
+  });
 };
 
 const likeItem = (req, res) => {
@@ -71,7 +84,7 @@ const likeItem = (req, res) => {
   const userId = req.user._id;
 
   clothingItem
-    .findByIdAndUpdate(itemId, { $addToSet: { likes: userId } })
+    .findByIdAndUpdate(itemId, { $addToSet: { likes: userId } }, { new: true })
     .orFail()
     .then((item) => {
       res.status(GOOD_STATUS_CODE).send({ data: item });
@@ -97,7 +110,7 @@ const deleteLike = (req, res) => {
   const userId = req.user._id;
 
   clothingItem
-    .findByIdAndUpdate(itemId, { $pull: { likes: userId } })
+    .findByIdAndUpdate(itemId, { $pull: { likes: userId } }, { new: true })
     .orFail()
     .then((item) => {
       res.status(GOOD_STATUS_CODE).send({ data: item });

@@ -8,6 +8,7 @@ const {
   NOT_FOUND_STATUS_CODE,
   INTERNAL_SERVER_ERROR_CODE,
   UNAUTHORIZED_STATUS_CODE,
+  CONFLICT_STATUS_CODE,
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
@@ -35,11 +36,16 @@ const createUser = (req, res) => {
         password: hash,
       })
     )
-    .then((user) => res.status(CREATE_STATUS_CODE).send(user))
+    .then((user) => {
+      const obj = user.toObject();
+      delete obj.password;
+
+      res.status(CREATE_STATUS_CODE).send(obj);
+    })
     .catch((err) => {
       console.error(err);
       if (err.code === 11000) {
-        return res.status(409).send({
+        return res.status(CONFLICT_STATUS_CODE).send({
           message: "Email already exists",
         });
       }
@@ -90,24 +96,42 @@ const userLogin = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+      if (err.message === "Incorrect email or password") {
+        return res
+          .status(UNAUTHORIZED_STATUS_CODE)
+          .send({ message: "Incorrect email or password" });
+      }
       return res
-        .status(UNAUTHORIZED_STATUS_CODE)
-        .send({ message: "Unauthorized User" });
+        .status(INTERNAL_SERVER_ERROR_CODE)
+        .send({ message: "Server Error" });
     });
 };
 
 const updateUser = (req, res) => {
-  const opts = { runValidators: true };
   const { name, avatar } = req.body;
   const { _id } = req.user;
 
-  User.findByIdAndUpdate(_id, { $set: { name, avatar }, opts })
+  User.findByIdAndUpdate(
+    _id,
+    { $set: { name, avatar } },
+    { new: true, runValidators: true }
+  )
     .orFail()
     .then((user) => {
+      if (!user) {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "User not found" });
+      }
       res.status(GOOD_STATUS_CODE).send(user);
     })
     .catch((err) => {
       console.error(err);
+      if (err.name === "ValidationError") {
+        return res
+          .status(BAD_STATUS_CODE)
+          .send({ message: "Invalid data provided" });
+      }
       return res
         .status(INTERNAL_SERVER_ERROR_CODE)
         .send({ message: err.message });
