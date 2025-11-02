@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+const User = require("../models/user");
+
 const {
   GOOD_STATUS_CODE,
   CREATE_STATUS_CODE,
@@ -87,6 +88,12 @@ const getCurrentUser = (req, res) => {
 const userLogin = (req, res) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    return res.status(BAD_STATUS_CODE).send({
+      message: "Email and password are required",
+    });
+  }
+
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
@@ -116,14 +123,13 @@ const updateUser = (req, res) => {
     { $set: { name, avatar } },
     { new: true, runValidators: true }
   )
-    .orFail()
     .then((user) => {
       if (!user) {
         return res
           .status(NOT_FOUND_STATUS_CODE)
           .send({ message: "User not found" });
       }
-      res.status(GOOD_STATUS_CODE).send(user);
+      return res.status(GOOD_STATUS_CODE).send(user);
     })
     .catch((err) => {
       console.error(err);

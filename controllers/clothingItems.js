@@ -58,7 +58,6 @@ const deleteItem = (req, res) => {
     }
     return clothingItem
       .findByIdAndDelete(itemId)
-      .orFail()
       .then(() => {
         res.status(GOOD_STATUS_CODE).send({ message: "Item Deleted" });
       })
@@ -85,7 +84,6 @@ const likeItem = (req, res) => {
 
   clothingItem
     .findByIdAndUpdate(itemId, { $addToSet: { likes: userId } }, { new: true })
-    .orFail()
     .then((item) => {
       res.status(GOOD_STATUS_CODE).send({ data: item });
     })
@@ -111,7 +109,6 @@ const deleteLike = (req, res) => {
 
   clothingItem
     .findByIdAndUpdate(itemId, { $pull: { likes: userId } }, { new: true })
-    .orFail()
     .then((item) => {
       res.status(GOOD_STATUS_CODE).send({ data: item });
     })
