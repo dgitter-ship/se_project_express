@@ -85,7 +85,12 @@ const likeItem = (req, res) => {
   clothingItem
     .findByIdAndUpdate(itemId, { $addToSet: { likes: userId } }, { new: true })
     .then((item) => {
-      res.status(GOOD_STATUS_CODE).send({ data: item });
+      if (!item) {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Item not found" });
+      }
+      return res.send({ data: item });
     })
     .catch((err) => {
       console.error(err);
@@ -110,7 +115,12 @@ const deleteLike = (req, res) => {
   clothingItem
     .findByIdAndUpdate(itemId, { $pull: { likes: userId } }, { new: true })
     .then((item) => {
-      res.status(GOOD_STATUS_CODE).send({ data: item });
+      if (!item) {
+        return res
+          .status(NOT_FOUND_STATUS_CODE)
+          .send({ message: "Item not found" });
+      }
+      return res.send({ data: item });
     })
     .catch((err) => {
       console.error(err);
