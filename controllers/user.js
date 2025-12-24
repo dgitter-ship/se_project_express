@@ -18,9 +18,10 @@ const getUser = (req, res) => {
     .then((users) => res.status(GOOD_STATUS_CODE).send(users))
     .catch((err) => {
       console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
+      next(err);
+      // return res
+      //   .status(INTERNAL_SERVER_ERROR_CODE)
+      //   .send({ message: "Server Error" });
     });
 };
 
@@ -46,16 +47,17 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.code === 11000) {
-        return res.status(CONFLICT_STATUS_CODE).send({
-          message: "Email already exists",
-        });
+        next(new CONFLICT_STATUS_CODE("Email already exists"));
+        // return res.status(CONFLICT_STATUS_CODE).send({
+        //   message: "Email already exists",
+        // });
       }
       if (err.name === "ValidationError") {
-        return res.status(BAD_STATUS_CODE).send({ message: err.message });
+        next(new BAD_STATUS_CODE("Invalid data"));
+        // return res.status(BAD_STATUS_CODE).send({ message: err.message });
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
     });
 };
 
@@ -72,16 +74,16 @@ const getCurrentUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.statusCode === NOT_FOUND_STATUS_CODE) {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Document Not Found" });
+        next(new NOT_FOUND_STATUS_CODE("Document Not Found"));
+        // return res
+        //   .status(NOT_FOUND_STATUS_CODE)
+        //   .send({ message: "Document Not Found" });
       }
       if (err.name === "CastError") {
-        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+        next(new BAD_STATUS_CODE("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
     });
 };
 
@@ -99,18 +101,18 @@ const userLogin = (req, res) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.send({ token });
+      res.send({ token, user });
     })
     .catch((err) => {
       console.error(err);
       if (err.message === "Incorrect email or password") {
-        return res
-          .status(UNAUTHORIZED_STATUS_CODE)
-          .send({ message: "Incorrect email or password" });
+        next(new UNAUTHORIZED_STATUS_CODE("Incorrect email or password"));
+        // return res
+        //   .status(UNAUTHORIZED_STATUS_CODE)
+        //   .send({ message: "Incorrect email or password" });
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
     });
 };
 
@@ -134,13 +136,10 @@ const updateUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res
-          .status(BAD_STATUS_CODE)
-          .send({ message: "Invalid data provided" });
+        next(new BAD_STATUS_CODE("Invalid data"));
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: err.message });
     });
 };
 

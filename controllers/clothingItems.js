@@ -8,18 +8,13 @@ const {
   FORBIDDEN_STATUS_CODE,
 } = require("../utils/errors");
 
-const getItems = (req, res) => {
+const getItems = (req, res, next) => {
   clothingItem
     .find({})
     .then((item) => {
       res.status(GOOD_STATUS_CODE).send(item);
     })
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
-    });
+    .catch(next);
 };
 
 const createItem = (req, res) => {
@@ -34,11 +29,14 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_STATUS_CODE).send({ message: err.message });
+        next(new BAD_STATUS_CODE("Invalid data"));
+        // return res.status(BAD_STATUS_CODE).send({ message: err.message });
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
+      // return res
+      //   .status(INTERNAL_SERVER_ERROR_CODE)
+      //   .send({ message: "Server Error" });
     });
 };
 
@@ -64,16 +62,20 @@ const deleteItem = (req, res) => {
       .catch((err) => {
         console.error(err);
         if (err.name === "CastError") {
-          return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+          next(new BAD_STATUS_CODE("Bad request"));
+          // return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
         }
         if (err.name === "DocumentNotFoundError") {
-          return res
-            .status(NOT_FOUND_STATUS_CODE)
-            .send({ message: "Invalid User Id" });
+          next(new NOT_FOUND_STATUS_CODE("Invalid User Id"));
+          // return res
+          //   .status(NOT_FOUND_STATUS_CODE)
+          //   .send({ message: "Invalid User Id" });
+        } else {
+          next(err);
         }
-        return res
-          .status(INTERNAL_SERVER_ERROR_CODE)
-          .send({ message: "Server Error" });
+        // return res
+        //   .status(INTERNAL_SERVER_ERROR_CODE)
+        //   .send({ message: "Server Error" });
       });
   });
 };
@@ -95,16 +97,20 @@ const likeItem = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+        next(new BAD_STATUS_CODE("Bad Request"));
+        // return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
       }
       if (err.name === "DocumentNotFoundError") {
-        return res
-          .status(NOT_FOUND_STATUS_CODE)
-          .send({ message: "Invalid User Id" });
+        next(new NOT_FOUND_STATUS_CODE("Invalid User Id"));
+        // return res
+        //   .status(NOT_FOUND_STATUS_CODE)
+        //   .send({ message: "Invalid User Id" });
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
+      // return res
+      //   .status(INTERNAL_SERVER_ERROR_CODE)
+      //   .send({ message: "Server Error" });
     });
 };
 
@@ -125,14 +131,18 @@ const deleteLike = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.name === "CastError") {
-        return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
+        next(new BAD_STATUS_CODE("Bad Request"));
+        // return res.status(BAD_STATUS_CODE).send({ message: "Bad Request" });
       }
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND_STATUS_CODE).send({ message: "Not Found" });
+        next(new NOT_FOUND_STATUS_CODE("Invalid User Id"));
+        // return res.status(NOT_FOUND_STATUS_CODE).send({ message: "Not Found" });
+      } else {
+        next(err);
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR_CODE)
-        .send({ message: "Server Error" });
+      // return res
+      //   .status(INTERNAL_SERVER_ERROR_CODE)
+      //   .send({ message: "Server Error" });
     });
 };
 
