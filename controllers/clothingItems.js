@@ -17,7 +17,7 @@ const getItems = (req, res, next) => {
     .catch(next);
 };
 
-const createItem = (req, res) => {
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -40,7 +40,7 @@ const createItem = (req, res) => {
     });
 };
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   clothingItem.findById(itemId).then((item) => {
@@ -80,7 +80,7 @@ const deleteItem = (req, res) => {
   });
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 
@@ -114,7 +114,7 @@ const likeItem = (req, res) => {
     });
 };
 
-const deleteLike = (req, res) => {
+const deleteLike = (req, res, next) => {
   const { itemId } = req.params;
   const userId = req.user._id;
 

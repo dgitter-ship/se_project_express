@@ -13,7 +13,7 @@ const {
 } = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
 
-const getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.find({})
     .then((users) => res.status(GOOD_STATUS_CODE).send(users))
     .catch((err) => {
@@ -25,7 +25,7 @@ const getUser = (req, res) => {
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   bcrypt
@@ -61,7 +61,7 @@ const createUser = (req, res) => {
     });
 };
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
   console.log(_id);
   User.findById(_id)
@@ -87,7 +87,7 @@ const getCurrentUser = (req, res) => {
     });
 };
 
-const userLogin = (req, res) => {
+const userLogin = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -116,7 +116,7 @@ const userLogin = (req, res) => {
     });
 };
 
-const updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, avatar } = req.body;
   const { _id } = req.user;
 
