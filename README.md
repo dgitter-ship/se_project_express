@@ -8,9 +8,17 @@ The back-end project is focused on creating a server for the WTWR application. Y
 
 `npm run dev` — to launch the server with the hot reload feature
 
+## Project Domain Name
+
+www.wtwr.r-o-o-t.net
+
+## Frontend Git Repo
+
+git@github.com:dgitter-ship/se_project_react.git
+
 ## Project Pitch Video
 
-Check out [this video](https://www.loom.com/share/64d18b7091b84fc9832fbb5f5bb656d6), where I describe my
+Check out [this video](https://www.loom.com/share/3e3e9ec28ffc4c30b10e161ffa11f8dc), where I describe my
 project and some challenges I faced while building it.
 
 ### Testing

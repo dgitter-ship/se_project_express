@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dgitter-ship/se_project_express.git"
+    "url": "https://github.com/dgitter-ship/se_project_express.git"
   },
   "license": "ISC",
   "author": "Devin Protain",
